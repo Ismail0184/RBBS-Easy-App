@@ -10,7 +10,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       title: Text(title),
       backgroundColor: Colors.red,
-      // Customize the AppBar here as needed
+      actions: [
+        IconButton(
+          icon: Icon(Icons.notifications),
+          onPressed: () {
+            // Handle notification icon tap
+          },
+        ),
+      ],
     );
   }
 
