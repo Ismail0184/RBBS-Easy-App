@@ -1,49 +1,55 @@
-import 'package:easy/screen/drawer.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:easy/screen/appbar.dart';
 import 'package:flutter/material.dart';
 
-main(){
-  runApp(const MyApp());
+void main() {
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        theme: ThemeData(primarySwatch: Colors.amber),
-        debugShowCheckedModeBanner: false,
-        home: ProductsActivity()
+      home: ProductCategoryPage(),
     );
   }
 }
 
-class ProductsActivity extends StatelessWidget {
-  const ProductsActivity({super.key});
+class ProductCategoryPage extends StatelessWidget {
+  final List<String> products = [
+    "Product 1",
+    "Product 2",
+    "Product 3",
+    "Product 4",
+    "Product 5",
+    "Product 6",
+  ];
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          title: Text("RBBS Easy"),
-          backgroundColor: Colors.red,
+        appBar: CustomAppBar(title: 'RBBS Easy'),
+        body: GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 10.0,
+            mainAxisSpacing: 10.0,
+          ),
+          itemCount: products.length,
+          padding: EdgeInsets.all(10.0),
+          itemBuilder: (BuildContext context, int index) {
+            return Container(
+              color: Colors.blue, // You can change the color as per your requirement
+              child: Center(
+                child: Text(
+                  products[index],
+                  style: TextStyle(color: Colors.white, fontSize: 20.0),
+                ),
+              ),
+            );
+          },
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: 0,
-          backgroundColor: Colors.red,
-          items: [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: "home"),
-            BottomNavigationBarItem(icon: Icon(Icons.card_giftcard), label: "Order"),
-            BottomNavigationBarItem(icon: Icon(Icons.scanner), label: "Coupon Scan"),
-          ],
-        ),
-        drawer: CustomDrawer(),
       ),
     );
   }
 }
-
-
-

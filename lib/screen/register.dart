@@ -18,7 +18,7 @@ class RegistrationPage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.red,
-          title: Text('Registration Page'),
+          title: Text('Sign Up / Registration'),
         ),
         body: Center(
           child: Padding(

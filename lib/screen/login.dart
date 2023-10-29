@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy/screen/dashboard.dart';
 import 'package:easy/screen/register.dart';
+import 'package:flutter/gestures.dart';
 
 void main() {
   runApp(LoginApp());
@@ -60,36 +61,43 @@ class _LoginPageState extends State<LoginPage> {
                     primary: Colors.red,
                   ),
                   onPressed: () {
-                    // Handle login logic here
-                    //String email = _emailController.text;
-                    //String password = _passwordController.text;
-                    // Add your authentication logic here
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => DashboardActivity()),
                     );
                   },
-                  child: Text('Login'),
+                  child: Text('Sign In'),
                 ),
 
-                Container(
-                  padding: EdgeInsets.all(16.0), // Add your desired padding here
-                  child: Text(
-                    'Do not have an account?',
-                    style: TextStyle(),
+            Container(
+              margin: EdgeInsets.only(top: 20),
+              child: RichText(
+                text: TextSpan(
+                  children: <TextSpan>[
+                    TextSpan(
+                      text: 'Do not have an account?',
+                      style: TextStyle(color: Colors.black),
+                    ),
+                    TextSpan(
+                      text: ' Sign Up',
+                      style: TextStyle(
+                            color: Colors.blue,
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.bold,
+                            decorationColor: Colors.blue, // Color of the underline
+                            decorationThickness: 2, // Thickness of the underline
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => RegistrationPage()),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                ElevatedButton(
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.red, // Set the background color
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => RegistrationPage()),
-                    );
-                  },
-                  child: Text('Register Here'),
                 ),
               ],
             ),

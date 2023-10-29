@@ -1,4 +1,7 @@
+import 'package:easy/screen/products.dart';
 import 'package:flutter/material.dart';
+
+import '../scanner/coupon_scan.dart';
 
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({super.key});
@@ -18,10 +21,17 @@ class CustomDrawer extends StatelessWidget {
                     currentAccountPicture: Image.network("https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Bosch-logo.svg/2560px-Bosch-logo.svg.png"),
                   )
               ),
-              ListTile(leading:Icon(Icons.list), title: Text("Products")),
+              ListTile(leading:Icon(Icons.list), title: Text("Products"),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => ProductCategoryPage()));
+                },
+              ),
               ListTile(leading:Icon(Icons.settings),title: Text("Account Settings")),
               ListTile(leading:Icon(Icons.card_giftcard),title: Text("My Orders")),
-              ListTile(leading:Icon(Icons.scanner),title: Text("Coupon Scan")),
+              ListTile(leading:Icon(Icons.scanner),title: Text("Coupon Scan"),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => QRViewExample()));
+                },),
               ListTile(leading:Icon(Icons.local_offer),title: Text("Promotions")),
               ListTile(leading:Icon(Icons.home),title: Text("Reward Points")),
               ListTile(leading:Icon(Icons.help),title: Text("Help Center ")),
