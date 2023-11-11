@@ -1,3 +1,5 @@
+import 'package:easy/screen/appbar.dart';
+import 'package:easy/screen/drawer.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -17,14 +19,18 @@ class ProductView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Product Name'),
-      ),
+      appBar: CustomAppBar(title: 'RBBS Easy'),
+      drawer: CustomDrawer(),
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
             // Product Image
-            Image.network('https://example.com/product_image.jpg'),
+            Container(
+              margin: EdgeInsets.only(top: 30),
+              child:
+              Image.network('https://i.i-sgcm.com/products/items/10/2015/09/10746_1.jpg'),
+
+            ),
 
             // Product Title
             Padding(
@@ -48,7 +54,7 @@ class ProductView extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                'Price: \$99.99',
+                'Price: BDT 99.99',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
@@ -57,8 +63,15 @@ class ProductView extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.resolveWith((states) {
+                    if (states.contains(MaterialState.pressed)) {
+                      return Colors.red; // Color when pressed
+                    }
+                    return Colors.red; // Default color
+                  }),
+                ),
                 onPressed: () {
-                  // Implement the functionality to add the product to the cart.
                 },
                 child: Text('Add to Cart'),
               ),
