@@ -64,68 +64,99 @@ class _MyListViewState extends State<CategoriActivity> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: CustomAppBar(title: 'Categories'),
-        body:
-        FutureBuilder<List<Item>>(
-          future: items,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else {
-              final itemList = snapshot.data;
-              return
-                ListView.builder(
-                  itemCount: itemList?.length,
-                  itemBuilder: (context, index) {
-                    return
-                      GestureDetector(
-                        onTap: (){
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => subCategoriActivity()),
-                          );
-                        },
-                        child: Container(
-                          margin: EdgeInsets.all(10),
-                          width: double.infinity,
-                          height: 100,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.all(Radius.circular(5)),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  spreadRadius: 1,
-                                  blurRadius: 4,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
-                              color: Colors.white
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Image.network(itemList![index].image!, width: 60),
-                              Text(itemList![index].name!),
-                              Container(
-                                height: 50,
-                                width: 50,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.red,
-                                ),
-                                child: Icon(Icons.arrow_forward),
+          appBar: CustomAppBar(title: 'RBBS Easy'),
+          drawer: CustomDrawer(),
+        body: Column (
+          children: [
+            Expanded(child: Container(
+              alignment: Alignment.center,
+              width: double.infinity,
+              height: 20,
+              child: Text("Product Categories", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+            )),
+            Expanded(
+              flex: 8,
+              child:
+
+              FutureBuilder<List<Item>>(
+              future: items,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else {
+                  final itemList = snapshot.data;
+                  return
+                    ListView.builder(
+                      itemCount: itemList?.length,
+                      itemBuilder: (context, index) {
+                        return
+                          GestureDetector(
+                            onTap: (){
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => subCategoriActivity()),
+                              );
+                            },
+                            child: Container(
+                              margin: EdgeInsets.all(10),
+                              width: double.infinity,
+                              height: 100,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.5),
+                                      spreadRadius: 1,
+                                      blurRadius: 4,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
+                                  color: Colors.white
                               ),
-                            ],
-                          ),
-                        ),
-                      );
-                  },
-                );
-            }
-          },
-        ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Expanded(
+                                      child: Container(
+                                        width:50,
+                                        height:50,
+                                        child: Image.network(itemList![index].image!),
+                                  )),
+                                  Expanded(
+                                    flex: 2,
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        width: double.infinity,
+                                        child: Text(itemList![index].name!),
+                                  )),
+                                  Expanded(
+                                      child: Container(
+                                        child: Container(
+                                          height: 40,
+                                          width: 40,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.red,
+                                          ),
+                                          child: Icon(Icons.arrow_forward),
+                                        ),
+                                      ),),
+
+
+
+                                ],
+                              ),
+                            ),
+                          );
+                      },
+                    );
+                }
+              },
+            ),)
+          ],
+        )
 
       ),
     );

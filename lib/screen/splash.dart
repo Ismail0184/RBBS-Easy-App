@@ -32,7 +32,7 @@ class _SplashState extends State<Splash> {
         body: Center(
             child: Container(
                 width: 370.0,
-                child: Image.network("https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Bosch-logo.svg/2560px-Bosch-logo.svg.png"))),
+                child: Image.network("http://icpd.icpbd-erp.com/assets/images/icon/400001.png"))),
       ),
     );
   }

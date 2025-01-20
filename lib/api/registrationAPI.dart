@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
 class CallApi{
-  final String _url = "http://bosch.icpbd.com/api/";
+  final String _url = "http://icpd.icpbd-erp.com/api/app/";
   postData(data,apiUrl)
   async {
     var fullUrl = _url+apiUrl;

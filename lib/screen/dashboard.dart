@@ -1,8 +1,8 @@
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:easy/screen/login.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../scanner/coupon_scan.dart';
 import '../slider/slider_sreen.dart';
 import 'drawer.dart';
 import 'appbar.dart';
@@ -37,7 +37,6 @@ class _DashboardActivityState extends State<DashboardActivity> {
   final List<Widget> _screens = [
     DashboardActivity(),
     DashboardActivity(),
-    QRViewExample(),
   ];
 
   String searchText = "";
@@ -55,28 +54,37 @@ class _DashboardActivityState extends State<DashboardActivity> {
     return SafeArea(
       child: Scaffold(
         appBar: CustomAppBar(title: 'RBBS Easy'),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: 0,
-          onTap: (int index) {
+        bottomNavigationBar: CurvedNavigationBar(
+          index: 1,
+          height: 60.0,
+          items: <Widget>[
+            Icon(Icons.home, size: 30,
+            color: Colors.white,
+            ),
+            Icon(Icons.shopping_cart, size: 30, color: Colors.white,),
+            Icon(Icons.scanner, size: 30, color: Colors.white,),
+          ],
+          color: Colors.red,
+          buttonBackgroundColor: Colors.red,
+          backgroundColor: Colors.white,
+          animationCurve: Curves.easeInOut,
+          animationDuration: Duration(milliseconds: 600),
+          onTap: (index) {
             setState(() {
-              _currentIndex = index;
             });
           },
-          items: [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: "home"),
-            BottomNavigationBarItem(icon: Icon(Icons.card_giftcard), label: "Order"),
-            BottomNavigationBarItem(icon: Icon(Icons.scanner), label: "Coupon Scan",),
-          ],
+          letIndexChange: (index) => true,
         ),
         drawer: CustomDrawer(),
         backgroundColor: Colors.grey[100],
 
-        body: SingleChildScrollView(
+        body:
+        SingleChildScrollView(
           child: Column(
             children: [
               GestureDetector(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(10),
                   child:
                   TextField(
                     controller: _textEditingController,
@@ -95,18 +103,51 @@ class _DashboardActivityState extends State<DashboardActivity> {
                 ),
               ),
               Container(
+                margin: EdgeInsets.all(10),
                 width: 360,
                 height: 180,
                 child: SliderScreen(),
               ),
+              Row(
+                children: [
+                  Expanded(child: Container(
+                    margin: EdgeInsets.only(left: 10,bottom: 5),
+                    child: Text(
+                      'Categories',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  )),
+                  Expanded(child: Container(
+                    alignment: Alignment.centerRight,
+                      margin: EdgeInsets.only(right: 10, bottom: 5),
+                      child: Icon(Icons.arrow_right_alt)
+                  ))
+                ],
+              ),
 
               Container(
-                margin: EdgeInsets.only(top: 20),
-                child: MyRowWidget(),
+                margin: EdgeInsets.all(10),
+                height: 150,
+                child: CategoriesWedget(),
               ),
-              Container(
-                child: BestSellerWidget(),
+
+              Row(
+                children: [
+                  Expanded(child: Container(
+                    margin: EdgeInsets.only(left: 10,bottom: 5),
+                    child: Text(
+                      'Populer',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  )),
+                  Expanded(child: Container(
+                      alignment: Alignment.centerRight,
+                      margin: EdgeInsets.only(right: 10, bottom: 5),
+                      child: Icon(Icons.arrow_right_alt)
+                  ))
+                ],
               ),
+
               Container(
                 child: BestSellerProducts1(),
               ),
@@ -127,19 +168,17 @@ class _DashboardActivityState extends State<DashboardActivity> {
   }
 }
 
-
-class MyRowWidget extends StatelessWidget {
+class CategoriesWedget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround, // Adjust alignment as needed
-      crossAxisAlignment: CrossAxisAlignment.center, // Adjust alignment as needed
-      children: <Widget>[
-        Container(
-          width: 165,
-          height: 150,
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      itemCount: 3,
+      itemBuilder: (context, index) {
+        return Container(
+          width: 200,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(5)),
+              borderRadius: BorderRadius.all(Radius.circular(5)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.withOpacity(0.5),
@@ -148,41 +187,14 @@ class MyRowWidget extends StatelessWidget {
                   offset: Offset(0, 2),
                 ),
               ],
-            color: Colors.red
+              color: Colors.red
           ),
-          child: Column (
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Image.network("https://cdn-icons-png.flaticon.com/512/4647/4647569.png", width: 70,),
-              Text("Power Tools", style: TextStyle(color: Colors.white))
-            ],
-          )
-        ),
-        Container(
-            width: 165,
-            height: 150,
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(5)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 1,
-                    blurRadius: 4,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-                color: Colors.red
-            ),
-
-            child: Column (
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Image.network("https://icons.veryicon.com/png/o/construction-tools/industrial-category-icon/auto-parts-2.png", width: 70,),
-                Text("Automotive Aftermarket", style: TextStyle(color: Colors.white))
-              ],
-            )
-        ),
-      ],
+          margin: EdgeInsets.symmetric(horizontal: 8),
+          child: Center(
+            child: Text('Category $index', style: TextStyle(fontSize: 20, color: Colors.white),),
+          ),
+        );
+      },
     );
   }
 }
@@ -396,11 +408,3 @@ class PromosionContainer extends StatelessWidget {
         child: Image.network("https://www.boschtools.com/ca/media/country_pool/website_banner.jpg", width: double.infinity, height: 150,));
   }
 }
-
-
-
-
-
-
-
-

@@ -3,7 +3,6 @@ import 'package:easy/screen/login.dart';
 import 'package:easy/screen/category.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../scanner/coupon_scan.dart';
 
 
 
@@ -56,7 +55,7 @@ class _HomeState extends State<CustomDrawer> {
                     decoration: BoxDecoration(color: Colors.red),
                     accountName: Text("${preferences.getString('name').toString()}", style: TextStyle(color: Colors.white)),
                     accountEmail: Text("${preferences.getString('mobile').toString()}", style: TextStyle(color: Colors.white)),
-                    currentAccountPicture: Image.network("https://cdn.freebiesupply.com/logos/large/2x/bosch-logo-black-and-white.png",),
+                    currentAccountPicture: Image.network("${preferences.getString('profilePicture').toString()}",),
                   )
               ),
               ListTile(leading:Icon(Icons.home), title: Text("Home"),
@@ -71,10 +70,6 @@ class _HomeState extends State<CustomDrawer> {
               ),
               ListTile(leading:Icon(Icons.settings),title: Text("Account Settings")),
               ListTile(leading:Icon(Icons.card_giftcard),title: Text("My Orders")),
-              ListTile(leading:Icon(Icons.scanner),title: Text("Coupon Scan"),
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => QRViewExample()));
-                },),
               ListTile(leading:Icon(Icons.local_offer),title: Text("Promotions")),
               ListTile(leading:Icon(Icons.home),title: Text("Reward Points")),
               ListTile(leading:Icon(Icons.help),title: Text("Help Center ")),

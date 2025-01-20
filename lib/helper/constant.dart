@@ -11,7 +11,7 @@ double deviceHeight(BuildContext context) {
 
 
 // API Url
-String apiUrl='http://bosch.icpbd.com/api';
+String apiUrl='http://icpd.icpbd-erp.com/api/app/login.php';
 
 spancer({
   double w = 0,

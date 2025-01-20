@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../methods/api.dart';
 
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -38,6 +39,12 @@ class _RegisterState extends State<Register> {
   TextEditingController password = TextEditingController();
 
   void registerUser() async {
+    showDialog(
+        context: context,
+        builder: (context){
+          return Center(child: CircularProgressIndicator());
+        }
+    );
     final data = {
       'name': name.text.toString(),
       'email': email.text.toString(),
@@ -51,6 +58,7 @@ class _RegisterState extends State<Register> {
     };
     final result = await API().postRequest(route: '/register', data: data);
     final response = jsonDecode(result.body);
+    Navigator.of(context).pop();
     if (response['status'] == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
