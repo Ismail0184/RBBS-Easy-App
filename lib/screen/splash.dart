@@ -31,7 +31,7 @@ class _SplashState extends State<Splash> {
       child: Scaffold(
         body: Center(
             child: Container(
-                width: 370.0,
+                width: 200.0,
                 child: Image.network("http://icpd.icpbd-erp.com/assets/images/icon/400001.png"))),
       ),
     );
