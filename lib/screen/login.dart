@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:easy/screen/dashboard.dart';
+import 'package:easy/screen/dashboards.dart';
 import 'package:easy/screen/register.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -33,7 +33,8 @@ class _LoginState extends State<LoginPage> {
     final response = jsonDecode(result.body);
     if (response['status'] == 200) {
       SharedPreferences preferences = await SharedPreferences.getInstance();
-      //await preferences.setInt('id', response['user']['id']);
+      await preferences.setInt('userid', response['user_id']);
+      await preferences.setInt('PBI_ID', response['PBI_ID']);
       await preferences.setString('name', response['name']);
       await preferences.setString('email', response['email']);
       await preferences.setString('mobile', response['mobile']);
@@ -47,7 +48,7 @@ class _LoginState extends State<LoginPage> {
       );
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => DashboardActivity(),
+          builder: (context) => UserDashboard(),
         ),
       );
     } else {

@@ -1,8 +1,11 @@
-import 'package:easy/screen/dashboard.dart';
+import 'package:easy/screen/attendance.dart';
 import 'package:easy/screen/login.dart';
 import 'package:easy/screen/category.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../modules/sales/order/createOrder.dart';
+import 'dashboards.dart';
 
 
 
@@ -60,12 +63,22 @@ class _HomeState extends State<CustomDrawer> {
               ),
               ListTile(leading:Icon(Icons.home), title: Text("Home"),
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => DashboardActivity()));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => UserDashboard()));
+                },
+              ),
+              ListTile(leading:Icon(Icons.assignment_turned_in), title: Text("Attendance Report"),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => AttendancePage()));
                 },
               ),
               ListTile(leading:Icon(Icons.list), title: Text("Products"),
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(builder: (context) => CategoriActivity()));
+                },
+              ),
+              ListTile(leading:Icon(Icons.list), title: Text("Create Order"),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => OrderFormScreen()));
                 },
               ),
               ListTile(leading:Icon(Icons.settings),title: Text("Account Settings")),

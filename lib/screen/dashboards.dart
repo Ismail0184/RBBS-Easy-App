@@ -1,110 +1,121 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import 'appbar.dart';
+import 'drawer.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(ERPApp());
 }
 
-class MyApp extends StatelessWidget {
+class ERPApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Admin Dashboard',
-      home: LoginScreen(),
+      title: 'ERP Dashboard',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: UserDashboard(),
     );
   }
 }
 
-class LoginScreen extends StatefulWidget {
-  @override
-  _LoginScreenState createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
-  Future<void> _login() async {
-    var url = Uri.parse('http://yourserver.com/api/login.php');
-    var response = await http.post(
-      url,
-      body: {
-        'email': _emailController.text,
-        'password': _passwordController.text,
-      },
-    );
-
-    var data = json.decode(response.body);
-    if (data['status'] == 'success') {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('token', data['token']);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => DashboardScreen()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Invalid login credentials'),
-      ));
-    }
-  }
-
+class UserDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      appBar: CustomAppBar(title: ''),
+      drawer: CustomDrawer(),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
+            Text(
+              'Modules',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
+            SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildOverviewCard('Total Sales', '\$50,000', Icons.attach_money, Colors.green),
+                _buildOverviewCard('Pending Orders', '25', Icons.pending_actions, Colors.orange),
+              ],
             ),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _login,
-              child: Text('Login'),
+            Text(
+              'Recent Activities',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 10),
+            _buildActivityTile('Order #1234 was shipped.', Icons.local_shipping, Colors.blue),
+            _buildActivityTile('New user registered.', Icons.person_add, Colors.green),
+            _buildActivityTile('Inventory updated for product #567.', Icons.update, Colors.orange),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOverviewCard(String title, String value, IconData icon, Color color) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Container(
+        padding: EdgeInsets.all(16),
+        width: 150,
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: color,
+              size: 40,
+            ),
+            SizedBox(height: 10),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 5),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
       ),
     );
   }
-}
 
-class DashboardScreen extends StatelessWidget {
-  Future<void> _logout(BuildContext context) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.remove('token');
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => LoginScreen()),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Admin Dashboard'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () => _logout(context),
-          ),
-        ],
+  Widget _buildActivityTile(String description, IconData icon, Color iconColor) {
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: iconColor,
       ),
-      body: Center(
-        child: Text('Welcome to the Dashboard!'),
-      ),
+      title: Text(description),
+      trailing: Icon(Icons.arrow_forward_ios, size: 16),
+      onTap: () {
+        // Handle activity tap
+      },
     );
   }
 }

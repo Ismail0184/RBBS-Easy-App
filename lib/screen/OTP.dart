@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:easy/screen/dashboard.dart';
+import 'package:easy/screen/attendance.dart';
 import 'package:easy/screen/register.dart';
 import 'package:flutter/gestures.dart';
+
+import 'dashboards.dart';
 
 void main() {
   runApp(LoginApp());
@@ -56,7 +58,7 @@ class _OTPPageState extends State<OTPPage> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => DashboardActivity()),
+                      MaterialPageRoute(builder: (context) => UserDashboard()),
                     );
                   },
                   child: Text('Confirm OTP'),
