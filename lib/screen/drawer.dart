@@ -4,7 +4,7 @@ import 'package:easy/screen/category.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../modules/sales/order/createOrder.dart';
+import '../modules/sales/order/createOrders.dart';
 import 'dashboards.dart';
 
 
@@ -78,7 +78,7 @@ class _HomeState extends State<CustomDrawer> {
               ),
               ListTile(leading:Icon(Icons.list), title: Text("Create Order"),
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => OrderFormScreen()));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => OrderFormPage()));
                 },
               ),
               ListTile(leading:Icon(Icons.settings),title: Text("Account Settings")),
