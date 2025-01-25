@@ -49,7 +49,7 @@ class UserDashboard extends StatelessWidget {
             ),
             SizedBox(height: 20),
             Text(
-              'Recent Activities',
+              'Current Trade Offer',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
