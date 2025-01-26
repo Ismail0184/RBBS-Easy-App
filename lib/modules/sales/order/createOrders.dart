@@ -136,7 +136,12 @@ class _OrderFormPageState extends State<OrderFormPage> {
         setState(() {
           presentStock = double.tryParse(stockData['stock'].toString()) ?? 0.0;
           rate = double.tryParse(stockData['rate'].toString()) ?? 0.0;
-          stockController.text = presentStock.toString();
+          // Ensure presentStock is not null
+          if ((presentStock ?? 0.0) > 0) {
+            stockController.text = 'Stock available';
+          } else {
+            stockController.text = 'No stock available';
+          }
           rateController.text = rate.toString();
         });
       } else {
@@ -408,6 +413,7 @@ class _OrderFormPageState extends State<OrderFormPage> {
                           child: TextField(
                             controller: stockController,
                             readOnly: true,
+                            textAlign: TextAlign.left,
                             decoration: InputDecoration(
                               labelText: 'Stock',
                               labelStyle: TextStyle(
@@ -463,8 +469,8 @@ class _OrderFormPageState extends State<OrderFormPage> {
                                   },
                                 );
                               } else {
-                                calculateAmount();
                               }
+                              calculateAmount();
                               validateOrderQuantity();
                             },
                           ),

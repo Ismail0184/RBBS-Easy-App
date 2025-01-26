@@ -33,6 +33,7 @@ class _OrderFormPageState extends State<OrderFormPage> {
   String? selectedBusinessCenter;
   String? selectedCustomer;
   String? selectedItem;
+  String? orderNo;
   double? presentStock = 0.0;
   double? rate = 0.0;
   double? orderQuantity = 0.0;
@@ -47,6 +48,7 @@ class _OrderFormPageState extends State<OrderFormPage> {
   TextEditingController rateController = TextEditingController();
   TextEditingController orderQuantityController = TextEditingController();
   TextEditingController amountController = TextEditingController();
+  TextEditingController orderNoController = TextEditingController();
 
   bool isOrderQuantityValid = true;
 
@@ -55,6 +57,38 @@ class _OrderFormPageState extends State<OrderFormPage> {
     super.initState();
     fetchBusinessCenters();
     fetchItems();
+    _fetchInvoiceNumber();
+  }
+
+
+
+  Future<void> _fetchInvoiceNumber() async {
+    // Example userID (replace with dynamic userID if necessary)
+    String userID = '61';
+    final String apiUrl = 'http://icpd.icpbd-erp.com/api/app/modules/sales/order/getLatestOrderNo.php'; // Your API URL
+    final response = await http.get(Uri.parse('$apiUrl?userID=$userID'));
+
+    if (response.statusCode == 200) {
+      // Decode the JSON response
+      final data = jsonDecode(response.body);
+
+      if (data['status'] == 'success') {
+        // Set the generated invoice number to the controller
+        setState(() {
+          orderNoController.text = data['invoiceNumber'];
+        });
+      } else {
+        // Handle error response from API
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${data['message']}')),
+        );
+      }
+    } else {
+      // Handle network error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch invoice number')),
+      );
+    }
   }
 
   Future<void> fetchBusinessCenters() async {
@@ -131,13 +165,11 @@ class _OrderFormPageState extends State<OrderFormPage> {
 
     final response = await http.post(
       Uri.parse('http://icpd.icpbd-erp.com/api/app/modules/sales/order/addItem.php'),
-      headers: {
-        'Content-Type': 'application/json', // Ensure correct header
-      },
       body: jsonEncode({
         'businessCenter': selectedBusinessCenter,
         'customer': selectedCustomer,
         'item': selectedItem,
+        'orderNo': orderNoController.text,
         'quantity': orderQuantity?.toString(),
         'rate': rate?.toString(),
         'amount': amount?.toString(),
@@ -216,6 +248,26 @@ class _OrderFormPageState extends State<OrderFormPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    TextField(
+                      controller: orderNoController,
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        labelText: 'Order No',
+                        labelStyle: TextStyle(
+                          color: Colors.grey, // Label color for read-only field
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[200], // Background color for read-only state
+                        border: OutlineInputBorder(),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.grey, // Border color for read-only state
+                          ),
+                          borderRadius: BorderRadius.circular(5.0), // Optional: Rounded corners
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 5),
                     Row(
                       children: [
                         Expanded(
@@ -264,7 +316,6 @@ class _OrderFormPageState extends State<OrderFormPage> {
                         ),
                       ],
                     ),
-
                     SizedBox(height: 16),
                     TypeAheadFormField(
                       textFieldConfiguration: TextFieldConfiguration(
@@ -443,7 +494,6 @@ class _OrderFormPageState extends State<OrderFormPage> {
                       ],
                     ),
                     SizedBox(height: 16),
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -457,6 +507,24 @@ class _OrderFormPageState extends State<OrderFormPage> {
                           ),
                           child: Text('Add Item'),
                         ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            Card(
+              elevation: 5,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
                         ElevatedButton(
                           onPressed: isOrderQuantityValid ? finalizeOrder : null,
                           style: ElevatedButton.styleFrom(
