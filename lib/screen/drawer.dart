@@ -4,6 +4,7 @@ import 'package:easy/screen/category.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../modules/employeeDashboard/attendance/leave/leaveApplication.dart';
 import '../modules/sales/order/createOrders.dart';
 import 'dashboards.dart';
 
@@ -64,6 +65,11 @@ class _HomeState extends State<CustomDrawer> {
               ListTile(leading:Icon(Icons.home), title: Text("Home"),
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(builder: (context) => UserDashboard()));
+                },
+              ),
+              ListTile(leading:Icon(Icons.assignment_turned_in), title: Text("Attendance Entry"),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => LeaveApplicationForm()));
                 },
               ),
               ListTile(leading:Icon(Icons.assignment_turned_in), title: Text("Attendance Report"),
