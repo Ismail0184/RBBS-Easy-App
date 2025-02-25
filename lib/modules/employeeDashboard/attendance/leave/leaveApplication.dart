@@ -45,21 +45,13 @@ class _LeaveApplicationFormState extends State<LeaveApplicationForm> {
   }
 
   Future<void> fetchLeaveTypes() async {
-    try {
-      final response = await http.get(Uri.parse("http://icpd.icpbd-erp.com/api/app/modules/employee-dashboard/attendance/leave/leaveType.php"));
-
-      if (response.statusCode == 200) {
-        setState(() {
-          leaveTypes = json.decode(response.body);
-        });
-      } else {
-        showAlert("Failed to fetch leave types. Status Code: ${response.statusCode}");
-      }
-    } catch (e) {
-      showAlert("Error fetching leave types: $e");
+    final response = await http.get(Uri.parse(leaveTypeApi));
+    if (response.statusCode == 200) {
+      setState(() {
+        leaveTypes = json.decode(response.body);
+      });
     }
   }
-
 
   Future<void> fetchUsers() async {
     final response = await http.get(Uri.parse(usersApi));
@@ -176,7 +168,6 @@ class _LeaveApplicationFormState extends State<LeaveApplicationForm> {
                   },
                   validator: (value) => value == null ? "Please select a leave type" : null,
                 ),
-
                 SizedBox(height: 16),
                 Text("Leave Policy: $leavePolicy"),
                 Text("Leave Taken: $leaveTaken"),
