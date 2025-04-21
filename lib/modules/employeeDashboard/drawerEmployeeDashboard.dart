@@ -1,14 +1,12 @@
-import 'package:easy/modules/employeeDashboard/homeEmployeeDashboard.dart';
-import 'package:easy/modules/sales/salesDashboard.dart';
 import 'package:easy/screen/attendance.dart';
 import 'package:easy/screen/login.dart';
 import 'package:easy/screen/category.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../modules/employeeDashboard/attendance/leave/leaveApplication.dart';
-import '../modules/sales/order/createOrders.dart';
-import 'dashboards.dart';
+import 'attendance/leave/leaveApplication.dart';
+import '../sales/order/createOrders.dart';
+import '../../screen/dashboards.dart';
 
 
 
@@ -69,24 +67,29 @@ class _HomeState extends State<CustomDrawer> {
                   Navigator.of(context).push(MaterialPageRoute(builder: (context) => UserDashboard()));
                 },
               ),
-              ListTile(leading:Icon(Icons.home), title: Text("Employee Dashboard"),
+              ListTile(leading:Icon(Icons.assignment_turned_in), title: Text("Leave Application"),
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => employeeDashboard()));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => LeaveApplicationForm()));
                 },
               ),
-              ListTile(leading:Icon(Icons.home), title: Text("Accounts Module"),
+              ListTile(leading:Icon(Icons.assignment_turned_in), title: Text("Late Attendance Application"),
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => UserDashboard()));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => LeaveApplicationForm()));
                 },
               ),
-              ListTile(leading:Icon(Icons.home), title: Text("Sales Module"),
+              ListTile(leading:Icon(Icons.assignment_turned_in), title: Text("OSD Application"),
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => salesDashboard()));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => LeaveApplicationForm()));
                 },
               ),
-              ListTile(leading:Icon(Icons.home), title: Text("Warehouse Module"),
+              ListTile(leading:Icon(Icons.assignment_turned_in), title: Text("WFH Application"),
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => UserDashboard()));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => LeaveApplicationForm()));
+                },
+              ),
+              ListTile(leading:Icon(Icons.assignment_turned_in), title: Text("Attendance Report"),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => AttendancePage()));
                 },
               ),
               ListTile(leading:Icon(Icons.logout),title: Text("Logout"),

@@ -1,14 +1,10 @@
-import 'package:easy/modules/employeeDashboard/homeEmployeeDashboard.dart';
-import 'package:easy/modules/sales/salesDashboard.dart';
-import 'package:easy/screen/attendance.dart';
+import 'package:easy/modules/sales/customer/createCustomer.dart';
+import 'package:easy/modules/sales/customer/viewCustomer.dart';
 import 'package:easy/screen/login.dart';
-import 'package:easy/screen/category.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../modules/employeeDashboard/attendance/leave/leaveApplication.dart';
-import '../modules/sales/order/createOrders.dart';
-import 'dashboards.dart';
+import 'order/createOrders.dart';
+import '../../screen/dashboards.dart';
 
 
 
@@ -69,24 +65,19 @@ class _HomeState extends State<CustomDrawer> {
                   Navigator.of(context).push(MaterialPageRoute(builder: (context) => UserDashboard()));
                 },
               ),
-              ListTile(leading:Icon(Icons.home), title: Text("Employee Dashboard"),
+              ListTile(leading:Icon(Icons.assignment_turned_in), title: Text("Add New Customer"),
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => employeeDashboard()));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => CustomerFormScreen()));
                 },
               ),
-              ListTile(leading:Icon(Icons.home), title: Text("Accounts Module"),
+              ListTile(leading:Icon(Icons.list), title: Text("Customers Status"),
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => UserDashboard()));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => CustomerListScreen()));
                 },
               ),
-              ListTile(leading:Icon(Icons.home), title: Text("Sales Module"),
+              ListTile(leading:Icon(Icons.list), title: Text("Create Order"),
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => salesDashboard()));
-                },
-              ),
-              ListTile(leading:Icon(Icons.home), title: Text("Warehouse Module"),
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => UserDashboard()));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => OrderFormPage()));
                 },
               ),
               ListTile(leading:Icon(Icons.logout),title: Text("Logout"),
