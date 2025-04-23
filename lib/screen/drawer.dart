@@ -1,13 +1,8 @@
 import 'package:easy/modules/employeeDashboard/homeEmployeeDashboard.dart';
 import 'package:easy/modules/sales/salesDashboard.dart';
-import 'package:easy/screen/attendance.dart';
 import 'package:easy/screen/login.dart';
-import 'package:easy/screen/category.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../modules/employeeDashboard/attendance/leave/leaveApplication.dart';
-import '../modules/sales/order/createOrders.dart';
 import 'dashboards.dart';
 
 
@@ -71,7 +66,7 @@ class _HomeState extends State<CustomDrawer> {
               ),
               ListTile(leading:Icon(Icons.home), title: Text("Employee Dashboard"),
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => employeeDashboard()));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => EmployeeDashboard()));
                 },
               ),
               ListTile(leading:Icon(Icons.home), title: Text("Accounts Module"),

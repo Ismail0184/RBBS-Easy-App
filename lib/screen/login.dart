@@ -38,6 +38,7 @@ class _LoginState extends State<LoginPage> {
       await preferences.setString('name', response['name']);
       await preferences.setString('email', response['email']);
       await preferences.setString('mobile', response['mobile']);
+      await preferences.setString('designation', response['designation']);
       await preferences.setString('profilePicture', response['profilePicture']);
       //await preferences.setString('token', response['token']);
       Navigator.of(context).pop();

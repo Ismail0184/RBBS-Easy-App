@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'attendance/leave/leaveApplication.dart';
 import '../sales/order/createOrders.dart';
 import '../../screen/dashboards.dart';
+import 'homeEmployeeDashboard.dart';
 
 
 
@@ -62,9 +63,14 @@ class _HomeState extends State<CustomDrawer> {
                     currentAccountPicture: Image.network("${preferences.getString('profilePicture').toString()}",),
                   )
               ),
-              ListTile(leading:Icon(Icons.home), title: Text("Home"),
+              ListTile(leading:Icon(Icons.home), title: Text("Main Dashboard"),
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(builder: (context) => UserDashboard()));
+                },
+              ),
+              ListTile(leading:Icon(Icons.home), title: Text("Employee Dashboard"),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => EmployeeDashboard()));
                 },
               ),
               ListTile(leading:Icon(Icons.assignment_turned_in), title: Text("Leave Application"),

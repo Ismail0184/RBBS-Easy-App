@@ -31,6 +31,34 @@ class Territory {
   int get hashCode => id.hashCode;
 }
 
+class CustomerType {
+  final String id;
+  final String type;
+
+  CustomerType({required this.id, required this.type});
+
+  factory CustomerType.fromJson(Map<String, dynamic> json) {
+    return CustomerType(
+      id: json['id'].toString(),
+      type: json['type'],
+    );
+  }
+
+  @override
+  String toString() => type;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is CustomerType &&
+              runtimeType == other.runtimeType &&
+              id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+}
+
+
 class EditCustomerForm extends StatefulWidget {
   final String customerId;
 
@@ -52,21 +80,32 @@ class _EditCustomerFormState extends State<EditCustomerForm> {
   final _binController = TextEditingController();
   final _nidController = TextEditingController();
 
-  final List<String> _customerTypes = [
-    'direct customer',
-    'Distributor',
-    'regular Customer',
-    'other'
-  ];
 
-  String? _selectedCustomerType;
+  List<CustomerType> _customerTypes = [];
+  CustomerType? _selectedCustomerType;
+
   Territory? _selectedTerritory;
   List<Territory> _territories = [];
 
   @override
   void initState() {
     super.initState();
+    _fetchCustomerTypes();
     _fetchTerritories();
+  }
+
+  Future<void> _fetchCustomerTypes() async {
+    final response = await http.get(Uri.parse(
+        'http://icpd.icpbd-erp.com/api/app/modules/sales/customer/getCustomerType.php'));
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      if (jsonResponse['statusCode'] == "200") {
+        List data = jsonResponse['data'];
+        _customerTypes = data.map((item) => CustomerType.fromJson(item)).toList();
+        setState(() {});
+        _fetchTerritories(); // call after customer types are loaded
+      }
+    }
   }
 
   Future<void> _fetchTerritories() async {
@@ -104,7 +143,10 @@ class _EditCustomerFormState extends State<EditCustomerForm> {
           _tinController.text = customer['tin'] ?? '';
           _binController.text = customer['bin'] ?? '';
           _nidController.text = customer['nid'] ?? '';
-          _selectedCustomerType = customer['customer_type'];
+          _selectedCustomerType = _customerTypes.firstWhere(
+                (type) => type.type == customer['customer_type'],
+            orElse: () => _customerTypes[0],
+          );
 
           _selectedTerritory = _territories.isNotEmpty
               ? _territories.firstWhere(
@@ -133,7 +175,7 @@ class _EditCustomerFormState extends State<EditCustomerForm> {
         "tin": _tinController.text,
         "bin": _binController.text,
         "nid": _nidController.text,
-        "customer_type": _selectedCustomerType,
+        "customer_type": _selectedCustomerType?.id,
         "territory": _selectedTerritory?.id,
         "entryBy": userid,
       };
@@ -179,13 +221,15 @@ class _EditCustomerFormState extends State<EditCustomerForm> {
   Widget _buildCustomerTypeDropdown() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: DropdownButtonFormField<String>(
+      child: DropdownButtonFormField<CustomerType>(
         decoration: InputDecoration(
-            labelText: 'Customer Type', border: OutlineInputBorder()),
+          labelText: 'Customer Type',
+          border: OutlineInputBorder(),
+        ),
         value: _selectedCustomerType,
         items: _customerTypes
-            .map((type) => DropdownMenuItem(
-          child: Text(type),
+            .map((type) => DropdownMenuItem<CustomerType>(
+          child: Text(type.type),
           value: type,
         ))
             .toList(),
@@ -199,6 +243,7 @@ class _EditCustomerFormState extends State<EditCustomerForm> {
       ),
     );
   }
+
 
   Widget _buildTerritoryDropdown() {
     return Padding(

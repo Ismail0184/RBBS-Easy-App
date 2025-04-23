@@ -47,8 +47,9 @@ class _LeaveApplicationFormState extends State<LeaveApplicationForm> {
   Future<void> fetchLeaveTypes() async {
     final response = await http.get(Uri.parse(leaveTypeApi));
     if (response.statusCode == 200) {
+      final result = json.decode(response.body);
       setState(() {
-        leaveTypes = json.decode(response.body);
+        leaveTypes = result['data'];
       });
     }
   }
@@ -154,9 +155,9 @@ class _LeaveApplicationFormState extends State<LeaveApplicationForm> {
                 DropdownButtonFormField(
                   decoration: InputDecoration(labelText: "Type of Leave"),
                   value: selectedLeaveType,
-                  items: leaveTypes.map((type) {
-                    return DropdownMenuItem(
-                      value: type['id'],
+                  items: leaveTypes.map<DropdownMenuItem<String>>((type) {
+                    return DropdownMenuItem<String>(
+                      value: type['id'].toString(),
                       child: Text(type['name']),
                     );
                   }).toList(),
@@ -168,6 +169,7 @@ class _LeaveApplicationFormState extends State<LeaveApplicationForm> {
                   },
                   validator: (value) => value == null ? "Please select a leave type" : null,
                 ),
+
                 SizedBox(height: 16),
                 Text("Leave Policy: $leavePolicy"),
                 Text("Leave Taken: $leaveTaken"),

@@ -1,5 +1,5 @@
 name: easy
-description: ICP Distribution
+description: An app for ICP Distribution
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -44,8 +44,10 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   intl: ^0.18.0
   flutter_typeahead: ^3.0.4
-
-
+  image_picker: ^1.0.4
+  path: ^1.8.3
+  path_provider: ^2.1.1
+  mime: ^1.0.4
 
 
 

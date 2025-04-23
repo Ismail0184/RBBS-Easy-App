@@ -10,6 +10,8 @@ class Customer {
   final String mobile;
   final String territory;
   final String status;
+  final String? photo;     // API returns just filename
+  final String? photoUrl;  // Full image URL
 
   Customer({
     required this.id,
@@ -17,6 +19,8 @@ class Customer {
     required this.mobile,
     required this.territory,
     required this.status,
+    this.photo,
+    this.photoUrl,
   });
 
   factory Customer.fromJson(Map<String, dynamic> json) {
@@ -26,6 +30,8 @@ class Customer {
       mobile: json['mobile_no'],
       territory: json['territory_name'],
       status: json['status'],
+      photo: json['photo'],     // full URL already
+      photoUrl: json['photo'],  // use the same
     );
   }
 }
@@ -55,15 +61,12 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
             "$label: ",
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          Expanded(
-            child: Text(value ?? "N/A"),
-          ),
+          Expanded(child: Text(value ?? "N/A")),
         ],
       ),
     );
   }
 
-  // Fetch customers from the API
   Future<void> _fetchCustomers() async {
     final response = await http.get(Uri.parse(
         'http://icpd.icpbd-erp.com/api/app/modules/sales/customer/pendingCustomerList.php'));
@@ -84,9 +87,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
     }
   }
 
-  // Delete customer using delete API
   Future<void> _deleteCustomer(String id) async {
-    // Show confirmation dialog first
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -105,18 +106,16 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
       ),
     );
 
-    // If user confirmed, proceed to delete
     if (confirmed == true) {
       final response = await http.post(
-        Uri.parse('http://icpd.icpbd-erp.com/api/app/modules/sales/customer/deleteAddedCustomer.php'),
+        Uri.parse(
+            'http://icpd.icpbd-erp.com/api/app/modules/sales/customer/deleteAddedCustomer.php'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({"customer_id": id}),
       );
 
       if (response.statusCode == 200) {
         final result = json.decode(response.body);
-
-        /// ✅ FIXED: Updated the success condition
         if (result['status'] == "success") {
           setState(() {
             _customers.removeWhere((customer) => customer.id == id);
@@ -138,20 +137,17 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
     }
   }
 
-  // View customer details
   Future<void> _viewCustomerDetails(String id) async {
     final response = await http.get(Uri.parse(
         'http://icpd.icpbd-erp.com/api/app/modules/sales/customer/getSingleCustomer.php?customer_id=$id'));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      print("API Response: $data");
-
       final status = data['status'].toString();
       final customerList = data['data'];
 
       if (status == "200" && customerList != null && customerList.isNotEmpty) {
-        final customer = customerList[0]; // Get first customer
+        final customer = customerList[0];
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -188,31 +184,26 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
         );
       }
     } else {
-      print("Failed to load details");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Failed to load customer details")),
       );
     }
   }
 
-  // Add this method to refresh the customer list after an update
   Future<void> _refreshCustomerList() async {
     setState(() {
-      _isLoading = true; // Optional: Show a loading indicator while refreshing
+      _isLoading = true;
     });
-    await _fetchCustomers(); // Re-fetch customers from the server
+    await _fetchCustomers();
   }
-  // Navigate to edit customer form
+
   Future<void> _editCustomer(Customer customer) async {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => EditCustomerForm(customerId: customer.id),
       ),
-    ).then((_) {
-      // After editing, refresh the customer list
-      _refreshCustomerList();
-    });
+    ).then((_) => _refreshCustomerList());
   }
 
   @override
@@ -227,9 +218,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => CustomerFormScreen(), // Your add form screen
-                ),
+                MaterialPageRoute(builder: (context) => CustomerFormScreen()),
               );
             },
           ),
@@ -238,12 +227,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _customers.isEmpty
-          ? Center(
-        child: Text(
-          'There is no data in the table',
-          style: TextStyle(fontSize: 16),
-        ),
-      )
+          ? Center(child: Text('There is no data in the table'))
           : ListView.builder(
         itemCount: _customers.length,
         itemBuilder: (context, index) {
@@ -251,6 +235,13 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
           return Card(
             margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             child: ListTile(
+              leading: CircleAvatar(
+                radius: 25,
+                backgroundImage: customer.photoUrl != null && customer.photoUrl!.isNotEmpty
+                    ? NetworkImage(customer.photoUrl!)
+                    : AssetImage('assets/images/user_placeholder.png') as ImageProvider,
+              ),
+
               title: Text(customer.name),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,7 +270,6 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                   ],
                 ],
               ),
-
             ),
           );
         },
@@ -287,15 +277,3 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
     );
   }
 }
-
-// Edit Customer Form (replace with your actual form)
-void _editCustomer(BuildContext context, Customer customer) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => EditCustomerForm(customerId: customer.id),
-    ),
-  );
-}
-
-
