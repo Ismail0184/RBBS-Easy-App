@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class LeaveApplicationForm extends StatefulWidget {
   @override
@@ -9,133 +10,160 @@ class LeaveApplicationForm extends StatefulWidget {
 }
 
 class _LeaveApplicationFormState extends State<LeaveApplicationForm> {
-  final _formKey = GlobalKey<FormState>();
-
-  // Controllers
-  TextEditingController leaveAddressController = TextEditingController();
-  TextEditingController leaveReasonController = TextEditingController();
-  TextEditingController mobileNumberController = TextEditingController();
-  TextEditingController startDateController = TextEditingController();
-  TextEditingController endDateController = TextEditingController();
-  TextEditingController appliedDaysController = TextEditingController();
-
-  // Dropdown values
   String? selectedLeaveType;
-  String? selectedResponsiblePerson;
-  String? selectedRecommenderPerson;
-  String? selectedAuthorizerPerson;
-
-  // Data from APIs
-  List<dynamic> leaveTypes = [];
-  List<dynamic> users = [];
   int leavePolicy = 0;
   int leaveTaken = 0;
   int leaveBalance = 0;
+  int appliedDays = 0;
 
-  // API URLs
-  final String leaveTypeApi = "http://icpd.icpbd-erp.com/api/app/modules/employee-dashboard/attendance/leave/leaveType.php";
-  final String usersApi = "YOUR_API_URL/users";
-  final String submitApi = "YOUR_API_URL/submit-leave";
+  bool isLoading = false;
+  bool isLoadingLeaveTypes = true;
+  bool isLoadingPersons = true;
+
+  List<Map<String, dynamic>> leaveTypes = [];
+  List<Map<String, dynamic>> persons = [];
+
+  final TextEditingController leavePolicyController = TextEditingController();
+  final TextEditingController leaveTakenController = TextEditingController();
+  final TextEditingController leaveBalanceController = TextEditingController();
+
+  final TextEditingController leaveAddressController = TextEditingController();
+  final TextEditingController leaveReasonController = TextEditingController();
+  final TextEditingController mobileNumberController = TextEditingController();
+  final TextEditingController appliedDaysController = TextEditingController();
+
+
+  String? responsiblePerson;
+  String? recommenderPerson;
+  String? authorizerPerson;
+
+  DateTime? leaveFromDate;
+  DateTime? leaveToDate;
 
   @override
   void initState() {
     super.initState();
     fetchLeaveTypes();
-    fetchUsers();
+    fetchPersons();
+  }
+
+  @override
+  void dispose() {
+    leavePolicyController.dispose();
+    leaveTakenController.dispose();
+    leaveBalanceController.dispose();
+    leaveAddressController.dispose();
+    leaveReasonController.dispose();
+    mobileNumberController.dispose();
+    appliedDaysController.dispose();
+    super.dispose();
   }
 
   Future<void> fetchLeaveTypes() async {
-    final response = await http.get(Uri.parse(leaveTypeApi));
-    if (response.statusCode == 200) {
-      final result = json.decode(response.body);
-      setState(() {
-        leaveTypes = result['data'];
-      });
-    }
-  }
-
-  Future<void> fetchUsers() async {
-    final response = await http.get(Uri.parse(usersApi));
-    if (response.statusCode == 200) {
-      setState(() {
-        users = json.decode(response.body);
-      });
-    }
-  }
-
-  Future<void> fetchLeaveDetails(String leaveType) async {
-    final response = await http.get(Uri.parse("http://icpd.icpbd-erp.com/api/app/modules/employee-dashboard/attendance/leave/getLeaveTypeBalance.php?user_id=61&type=$leaveType"));
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      setState(() {
-        leavePolicy = data['leave_policy'];
-        leaveTaken = data['leave_taken'];
-        leaveBalance = leavePolicy - leaveTaken;
-      });
-    }
-  }
-
-  void calculateAppliedDays() {
-    if (startDateController.text.isNotEmpty && endDateController.text.isNotEmpty) {
-      final startDate = DateFormat('yyyy-MM-dd').parse(startDateController.text);
-      final endDate = DateFormat('yyyy-MM-dd').parse(endDateController.text);
-      final days = endDate.difference(startDate).inDays + 1;
-
-      if (days > leaveBalance) {
-        showAlert("You cannot exceed the leave balance.");
+    final url = Uri.parse("http://icpd.icpbd-erp.com/api/app/modules/employee-dashboard/attendance/leave/leaveType.php");
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        final List types = body['data'];
         setState(() {
-          startDateController.clear();
-          endDateController.clear();
-        });
-      } else {
-        setState(() {
-          appliedDaysController.text = days.toString();
+          leaveTypes = types.map((item) => {
+            'id': item['id'].toString(),
+            'name': item['name'].toString(),
+          }).toList();
         });
       }
+    } catch (e) {
+      print("Error fetching leave types: $e");
+    } finally {
+      setState(() => isLoadingLeaveTypes = false);
     }
   }
 
-  void showAlert(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text("Alert"),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("OK"),
-          )
-        ],
-      ),
-    );
+  Future<void> fetchPersons() async {
+    final url = Uri.parse("http://icpd.icpbd-erp.com/api/app/modules/employee-dashboard/getActivePerson.php");
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final List personList = data['data'];
+        setState(() {
+          persons = personList.map((item) => {
+            'id': item['id'].toString(),
+            'name': item['name'].toString(),
+          }).toList();
+        });
+      }
+    } catch (e) {
+      print("Error fetching persons: $e");
+    } finally {
+      setState(() => isLoadingPersons = false);
+    }
   }
 
-  Future<void> submitForm() async {
-    if (_formKey.currentState!.validate()) {
-      final data = {
-        "type": selectedLeaveType,
-        "leave_address": leaveAddressController.text,
-        "leave_reason": leaveReasonController.text,
-        "mobile_number": mobileNumberController.text,
-        "responsible_person": selectedResponsiblePerson,
-        "recommender_person": selectedRecommenderPerson,
-        "authorizer_person": selectedAuthorizerPerson,
-        "leave_from": startDateController.text,
-        "leave_to": endDateController.text,
-        "applied_days": appliedDaysController.text,
-      };
-
-      final response = await http.post(
-        Uri.parse(submitApi),
-        headers: {"Content-Type": "application/json"},
-        body: json.encode(data),
-      );
-
+  Future<void> fetchLeaveDetails(String leaveTypeId) async {
+    final SharedPreferences preferences = await SharedPreferences.getInstance();
+    final userId = preferences.getInt('PBI_ID') ?? 0;
+    final url = Uri.parse('http://icpd.icpbd-erp.com/api/app/modules/employee-dashboard/attendance/leave/getLeaveTypeBalance.php?type=$leaveTypeId&user_id=$userId');
+    setState(() => isLoading = true);
+    try {
+      final response = await http.get(url);
       if (response.statusCode == 200) {
-        showAlert("Leave application submitted successfully.");
+        final data = jsonDecode(response.body);
+        setState(() {
+          leavePolicy = int.tryParse(data['leavePolicy'].toString()) ?? 0;
+          leaveTaken = int.tryParse(data['totalLeaveTaken'].toString()) ?? 0;
+          leaveBalance = int.tryParse(data['leaveBalance'].toString()) ?? 0;
+
+          leavePolicyController.text = leavePolicy.toString();
+          leaveTakenController.text = leaveTaken.toString();
+          leaveBalanceController.text = leaveBalance.toString();
+        });
+      }
+    } catch (e) {
+      print('Error: $e');
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  void pickDateRange() async {
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime.now().subtract(Duration(days: 365)),
+      lastDate: DateTime.now().add(Duration(days: 365)),
+    );
+
+    if (picked != null) {
+      final from = picked.start;
+      final to = picked.end;
+      final days = to.difference(from).inDays + 1;
+
+      if (days > leaveBalance) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("Leave Limit Exceeded"),
+            content: Text("Selected days exceed your leave balance."),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text("OK"),
+              ),
+            ],
+          ),
+        );
+        setState(() {
+          leaveFromDate = null;
+          leaveToDate = null;
+          appliedDaysController.text = '';
+        });
       } else {
-        showAlert("Failed to submit leave application.");
+        setState(() {
+          leaveFromDate = from;
+          leaveToDate = to;
+          appliedDaysController.text = days.toString();
+        });
       }
     }
   }
@@ -143,163 +171,146 @@ class _LeaveApplicationFormState extends State<LeaveApplicationForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Leave Application")),
+      appBar: AppBar(title: Text('Leave Application Form')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                DropdownButtonFormField(
-                  decoration: InputDecoration(labelText: "Type of Leave"),
-                  value: selectedLeaveType,
-                  items: leaveTypes.map<DropdownMenuItem<String>>((type) {
-                    return DropdownMenuItem<String>(
-                      value: type['id'].toString(),
-                      child: Text(type['name']),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedLeaveType = value as String?;
-                    });
-                    fetchLeaveDetails(selectedLeaveType!);
-                  },
-                  validator: (value) => value == null ? "Please select a leave type" : null,
+        child: isLoadingLeaveTypes || isLoadingPersons
+            ? Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+          child: Column(
+            children: [
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(labelText: 'Select Leave Type', border: OutlineInputBorder()),
+                value: selectedLeaveType,
+                items: leaveTypes.map((type) {
+                  return DropdownMenuItem<String>(
+                    value: type['id'],
+                    child: Text(type['name']),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() => selectedLeaveType = value);
+                  if (value != null) {
+                    fetchLeaveDetails(value);
+                  }
+                },
+              ),
+              SizedBox(height: 20),
+              if (isLoading) CircularProgressIndicator() else Row(
+                children: [
+                  Expanded(child: TextFormField(enabled: false, controller: leavePolicyController, decoration: InputDecoration(labelText: 'Leave Policy', border: OutlineInputBorder()))),
+                  SizedBox(width: 10),
+                  Expanded(child: TextFormField(enabled: false, controller: leaveTakenController, decoration: InputDecoration(labelText: 'Leave Taken', border: OutlineInputBorder()))),
+                  SizedBox(width: 10),
+                  Expanded(child: TextFormField(enabled: false, controller: leaveBalanceController, decoration: InputDecoration(labelText: 'Leave Balance', border: OutlineInputBorder()))),
+                ],
+              ),
+              SizedBox(height: 20),
+              TextFormField(controller: leaveAddressController, decoration: InputDecoration(labelText: 'Leave Address (optional)', border: OutlineInputBorder())),
+              SizedBox(height: 20),
+              TextFormField(controller: leaveReasonController, decoration: InputDecoration(labelText: 'Leave Reason', border: OutlineInputBorder()), validator: (value) => value!.isEmpty ? 'Required' : null),
+              SizedBox(height: 20),
+              TextFormField(controller: mobileNumberController, decoration: InputDecoration(labelText: 'Mobile Number (optional)', border: OutlineInputBorder()), keyboardType: TextInputType.phone),
+              SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: 'Responsible Person',
+                  border: OutlineInputBorder(),
                 ),
+                value: responsiblePerson,
+                items: persons.map((p) {
+                  return DropdownMenuItem<String>(
+                    value: p['id'],
+                    child: Text(
+                      p['name'],
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                }).toList(),
+                onChanged: (val) => setState(() => responsiblePerson = val),
+              ),
+              SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: 'Recommender Person',
+                  border: OutlineInputBorder(),
+                ),
+                value: recommenderPerson,
+                items: persons.map((p) {
+                  return DropdownMenuItem<String>(
+                    value: p['id'],
+                    child: Text(
+                      p['name'],
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                }).toList(),
+                onChanged: (val) => setState(() => recommenderPerson = val),
+              ),
+              SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: 'Authorizer Person',
+                  border: OutlineInputBorder(),
+                ),
+                value: authorizerPerson,
+                items: persons.map((p) {
+                  return DropdownMenuItem<String>(
+                    value: p['id'],
+                    child: Text(
+                      p['name'],
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                }).toList(),
+                onChanged: (val) => setState(() => authorizerPerson = val),
+              ),
 
-                SizedBox(height: 16),
-                Text("Leave Policy: $leavePolicy"),
-                Text("Leave Taken: $leaveTaken"),
-                Text("Leave Balance: $leaveBalance"),
-                SizedBox(height: 16),
-                TextFormField(
-                  controller: leaveAddressController,
-                  decoration: InputDecoration(labelText: "Leave Address"),
-                  validator: (value) => value!.isEmpty ? "Please enter leave address" : null,
-                ),
-                SizedBox(height: 16),
-                TextFormField(
-                  controller: leaveReasonController,
-                  decoration: InputDecoration(labelText: "Leave Reason"),
-                  validator: (value) => value!.isEmpty ? "Please enter leave reason" : null,
-                ),
-                SizedBox(height: 16),
-                TextFormField(
-                  controller: mobileNumberController,
-                  decoration: InputDecoration(labelText: "Mobile Number"),
-                  validator: (value) => value!.isEmpty ? "Please enter mobile number" : null,
-                ),
-                SizedBox(height: 16),
-                DropdownButtonFormField(
-                  decoration: InputDecoration(labelText: "Responsible Person"),
-                  value: selectedResponsiblePerson,
-                  items: users.map((user) {
-                    return DropdownMenuItem(
-                      value: user['id'],
-                      child: Text(user['name']),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedResponsiblePerson = value as String?;
-                    });
-                  },
-                  validator: (value) => value == null ? "Please select a responsible person" : null,
-                ),
-                SizedBox(height: 16),
-                DropdownButtonFormField(
-                  decoration: InputDecoration(labelText: "Recommender Person"),
-                  value: selectedRecommenderPerson,
-                  items: users.map((user) {
-                    return DropdownMenuItem(
-                      value: user['id'],
-                      child: Text(user['name']),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedRecommenderPerson = value as String?;
-                    });
-                  },
-                  validator: (value) => value == null ? "Please select a recommender person" : null,
-                ),
-                SizedBox(height: 16),
-                DropdownButtonFormField(
-                  decoration: InputDecoration(labelText: "Authorizer Person"),
-                  value: selectedAuthorizerPerson,
-                  items: users.map((user) {
-                    return DropdownMenuItem(
-                      value: user['id'],
-                      child: Text(user['name']),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedAuthorizerPerson = value as String?;
-                    });
-                  },
-                  validator: (value) => value == null ? "Please select an authorizer person" : null,
-                ),
-                SizedBox(height: 16),
-                TextFormField(
-                  controller: startDateController,
-                  decoration: InputDecoration(labelText: "Leave From"),
-                  readOnly: true,
-                  onTap: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
-                    );
-                    if (date != null) {
-                      setState(() {
-                        startDateController.text = DateFormat('yyyy-MM-dd').format(date);
-                      });
-                      calculateAppliedDays();
-                    }
-                  },
-                  validator: (value) => value!.isEmpty ? "Please select a start date" : null,
-                ),
-                SizedBox(height: 16),
-                TextFormField(
-                  controller: endDateController,
-                  decoration: InputDecoration(labelText: "Leave To"),
-                  readOnly: true,
-                  onTap: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
-                    );
-                    if (date != null) {
-                      setState(() {
-                        endDateController.text = DateFormat('yyyy-MM-dd').format(date);
-                      });
-                      calculateAppliedDays();
-                    }
-                  },
-                  validator: (value) => value!.isEmpty ? "Please select an end date" : null,
-                ),
-                SizedBox(height: 16),
-                TextFormField(
-                  controller: appliedDaysController,
-                  decoration: InputDecoration(labelText: "Total Applied Days"),
-                  readOnly: true,
-                ),
-                SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: leaveBalance > 0 && appliedDaysController.text.isNotEmpty
-                      ? submitForm
-                      : null,
-                  child: Text("Submit"),
-                ),
-              ],
-            ),
+              SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: pickDateRange,
+                      icon: Icon(Icons.date_range, size: 20),
+                      label: Text(
+                        'Pick Leave Dates',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: Colors.blueAccent,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 2,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: TextFormField(
+                      enabled: false,
+                      controller: appliedDaysController,
+                      decoration: InputDecoration(labelText: 'Applied Days', border: OutlineInputBorder()),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: (leaveFromDate != null && leaveToDate != null && appliedDaysController.text.isNotEmpty)
+                    ? () {
+                  // Submit logic here
+                }
+                    : null,
+                child: Text('Submit the Application'),
+              ),
+            ],
           ),
         ),
       ),
